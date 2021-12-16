@@ -5,17 +5,14 @@ import GHC.Generics (Generic)
 import Data.ByteString.Lazy.Char8 (pack)
 
 
-newtype ServerConfig = ServerConfig { port :: Int } deriving (Generic, Show)
+newtype ServerConfig = ServerConfig { port :: Int } deriving (Generic, FromJSON, Show)
 
 data TelegramConfig = TelegramConfig { token :: String
-                                     , apiUrl :: String } deriving (Generic, Show)
+                                     , apiUrl :: String } deriving (Generic, FromJSON, Show)
 
 data Config = Config { telegram :: TelegramConfig
-                     , server :: ServerConfig } deriving (Generic, Show)
+                     , server :: ServerConfig } deriving (Generic, FromJSON, Show)
 
-instance FromJSON ServerConfig
-instance FromJSON TelegramConfig
-instance FromJSON Config
 
 
 getConfig :: IO (Either String Config)

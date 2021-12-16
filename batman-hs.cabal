@@ -38,6 +38,7 @@ library
   default-extensions:
       OverloadedStrings
       DeriveGeneric
+      DeriveAnyClass
   build-depends:
       aeson
     , base >=4.7 && <5
@@ -59,6 +60,7 @@ executable batman-hs-exe
   default-extensions:
       OverloadedStrings
       DeriveGeneric
+      DeriveAnyClass
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson
@@ -83,6 +85,7 @@ test-suite batman-hs-test
   default-extensions:
       OverloadedStrings
       DeriveGeneric
+      DeriveAnyClass
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson
