@@ -8,27 +8,29 @@ import GHC.Generics (Generic)
 import Data.Aeson ( FromJSON, decode )
 import Data.ByteString.Lazy.Char8 (pack)
 import qualified Config
-import Config (Config, getConfig')
+import Config (Config, getConfig', BatmanConfig)
 import System.Cron (execSchedule, addJob, parseCronSchedule, describe)
 import Data.Text (Text)
 import System.Cron.Describe (defaultOpts)
+import qualified Model.Batman as Batman
 
 
 main :: IO ()
 main = do
     config <- getConfig'
-    startAnalysisJob "* * * * *"
+    startBatmanJOb $ Config.batman config
     server config
 
 
 
-startAnalysisJob :: Text -> IO ()
-startAnalysisJob cronExp = do 
+startBatmanJOb :: BatmanConfig  -> IO ()
+startBatmanJOb config = do 
     putStrLn description'
-    execSchedule $ addJob runAnalysis cronExp
+    execSchedule $ addJob (Batman.run config) cronExp
     pure ()
 
-    where description' = case parseCronSchedule cronExp of
+    where cronExp = Config.cronExp config
+          description' = case parseCronSchedule cronExp of
             Left err -> error err
             Right cs -> "running analysis " ++ describe defaultOpts cs
 
@@ -39,10 +41,3 @@ server config = do
     let port = Config.port . Config.server $ config
     scotty port $ do
         Telegram.controller (Config.telegram config)
-
-
-
-runAnalysis :: IO ()
-runAnalysis = do
-    putStrLn "Running analysis..."
-    

@@ -28,6 +28,9 @@ library
       Config
       Controllers.Telegram
       Lib
+      Model.Analysis.Analysis
+      Model.Asset
+      Model.Batman
       Model.Group
       Persistence.Database
       TelegramChat
@@ -42,9 +45,11 @@ library
   build-depends:
       aeson
     , base >=4.7 && <5
+    , bifunctors
     , bytestring
     , containers
     , cron
+    , extra
     , req
     , scotty
     , text
@@ -66,9 +71,11 @@ executable batman-hs-exe
       aeson
     , base >=4.7 && <5
     , batman-hs
+    , bifunctors
     , bytestring
     , containers
     , cron
+    , extra
     , req
     , scotty
     , text
@@ -91,9 +98,11 @@ test-suite batman-hs-test
       aeson
     , base >=4.7 && <5
     , batman-hs
+    , bifunctors
     , bytestring
     , containers
     , cron
+    , extra
     , req
     , scotty
     , text
