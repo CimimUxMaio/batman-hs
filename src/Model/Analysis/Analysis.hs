@@ -1,10 +1,14 @@
 module Model.Analysis.Analysis where
 
 import Model.Asset as Asset
-import Data.List.Extra (takeEnd)
+import Model.Utils ( current, previous )
+import Data.Foldable.Extra (find)
+import Model.Analysis.Candlesticks (match, suggestion, patterns, CandlesticksPattern (patternSize))
+import Model.Analysis.Suggestion (Suggestion (SELL, HODL, BUY))
+import Data.List.Extra (sortOn)
 
-data AnalysisResult = BUY | SELL | HODL deriving Show
 
+type AnalysisResult = Suggestion
 type Analysis = Asset -> AnalysisResult
 
 
@@ -35,12 +39,7 @@ macd = base overbought oversold
           previousDelta asset = previousMACD asset - previousSignal asset
 
 
-
-indexEnd :: Int -> [a] -> a
-indexEnd i = head . takeEnd i
-
-current :: [a] -> a
-current = indexEnd 1
-
-previous :: [a] -> a
-previous = indexEnd 2
+candlesticks :: Analysis
+candlesticks asset = maybe HODL suggestion (find (`match` candles) patterns)
+    where candles = init . Asset.candlesticks $ asset -- Take all candles except the last one (unconfirmed)
+          orderedPatterns = sortOn patternSize patterns 

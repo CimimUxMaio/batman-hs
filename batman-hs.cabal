@@ -29,9 +29,12 @@ library
       Controllers.Telegram
       Lib
       Model.Analysis.Analysis
+      Model.Analysis.Candlesticks
+      Model.Analysis.Suggestion
       Model.Asset
       Model.Batman
       Model.Group
+      Model.Utils
       Persistence.Database
       TelegramChat
   other-modules:

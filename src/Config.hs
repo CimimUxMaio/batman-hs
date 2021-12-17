@@ -12,9 +12,11 @@ newtype ServerConfig = ServerConfig { port :: Int } deriving (Generic, FromJSON,
 data TelegramConfig = TelegramConfig { token :: String
                                      , apiUrl :: Text } deriving (Generic, FromJSON, Show)
 
-data BatmanConfig = BatmanConfig { cronExp    :: Text
-                                 , cryptos    :: [String]
-                                 , dataApiUrl :: Text } deriving (Generic, FromJSON, Show)
+data BatmanConfig = BatmanConfig { cronExp      :: Text
+                                 , cryptos      :: [String]
+                                 , dataApiUrl   :: Text 
+                                 , dataInterval :: Text
+                                 , dataAmount   :: Int } deriving (Generic, FromJSON, Show)
 
 data Config = Config { telegram :: TelegramConfig
                      , server :: ServerConfig
