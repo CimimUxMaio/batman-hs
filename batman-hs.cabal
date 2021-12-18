@@ -89,6 +89,8 @@ test-suite batman-hs-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      CandlesticksSpec
+      TestUtils
       Paths_batman_hs
   hs-source-dirs:
       test
@@ -106,6 +108,7 @@ test-suite batman-hs-test
     , containers
     , cron
     , extra
+    , hspec
     , req
     , scotty
     , text

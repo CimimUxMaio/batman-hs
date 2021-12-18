@@ -1,2 +1,6 @@
+import Test.Hspec (hspec)
+import qualified CandlesticksSpec
+
 main :: IO ()
-main = putStrLn "Test suite not yet implemented"
+main = hspec $ do
+    CandlesticksSpec.spec

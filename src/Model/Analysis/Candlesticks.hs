@@ -100,11 +100,11 @@ losses = filter (< 0) . map gain
 
 
 averageGain :: [Candle] -> Double
-averageGain = average . gains
+averageGain = average 0 . gains
 
 
 averageLoss :: [Candle] -> Double
-averageLoss = average . losses
+averageLoss = average 0 . losses
 
 
 height :: Candle -> Double
