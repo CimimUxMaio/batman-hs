@@ -6,7 +6,7 @@ import Model.Utils ( average, current )
 import Data.List.Extra (takeEnd)
 
 
-data CandlesticksPattern = CandlesticksPattern { description :: String
+data CandlesticksPattern = CandlesticksPattern { name :: String
                                                , patternSize :: Int
                                                , match       :: [Candle] -> Bool
                                                , suggestion  :: Suggestion }
@@ -20,7 +20,7 @@ patterns = [ bullishHammer
 
 
 bullishHammer :: CandlesticksPattern
-bullishHammer = CandlesticksPattern { description = "bullish hammer"
+bullishHammer = CandlesticksPattern { name = "bullish hammer"
                                     , patternSize = 1
                                     , match = match
                                     , suggestion = BUY }
@@ -28,7 +28,7 @@ bullishHammer = CandlesticksPattern { description = "bullish hammer"
 
 
 bullishInvertedHammer :: CandlesticksPattern
-bullishInvertedHammer = CandlesticksPattern { description = "bullish inverted hammer"
+bullishInvertedHammer = CandlesticksPattern { name = "bullish inverted hammer"
                                             , patternSize = 1
                                             , match = match
                                             , suggestion = BUY }
@@ -36,7 +36,7 @@ bullishInvertedHammer = CandlesticksPattern { description = "bullish inverted ha
 
 
 hangingMan :: CandlesticksPattern
-hangingMan = CandlesticksPattern { description = "hanging man"
+hangingMan = CandlesticksPattern { name = "hanging man"
                                  , patternSize = 1
                                  , match = match
                                  , suggestion = SELL }
@@ -44,7 +44,7 @@ hangingMan = CandlesticksPattern { description = "hanging man"
 
 
 shootingStar :: CandlesticksPattern
-shootingStar = CandlesticksPattern { description = "shooting star"
+shootingStar = CandlesticksPattern { name = "shooting star"
                                    , patternSize = 1
                                    , match = match
                                    , suggestion = SELL }

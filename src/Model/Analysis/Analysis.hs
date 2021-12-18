@@ -3,23 +3,28 @@ module Model.Analysis.Analysis where
 import Model.Asset as Asset
 import Model.Utils ( current, previous )
 import Data.Foldable.Extra (find)
-import Model.Analysis.Candlesticks (match, suggestion, patterns, CandlesticksPattern (patternSize, description))
+import Model.Analysis.Candlesticks (patterns, CandlesticksPattern (match, patternSize, name)) 
+import qualified Model.Analysis.Candlesticks as Candlesticks
 import Model.Analysis.Suggestion (Suggestion (SELL, HODL, BUY))
 import Data.List.Extra (sortOn)
 
 
-data AnalysisResult = AnalysisResult Suggestion String deriving Show
+data AnalysisResult = AnalysisResult { analysis   :: String
+                                     , reason     :: String 
+                                     , suggestion :: Suggestion } deriving Show
 
 type Analysis = Asset -> AnalysisResult
 
 
 base :: String -> (Asset -> Bool) -> (Asset -> Bool) -> Analysis
-base description overbought oversold asset
-    | overbought asset = result SELL
-    | oversold asset   = result BUY 
-    | otherwise        = result HODL
+base analysisName overbought oversold asset
+    | overbought asset = result SELL "overbought"
+    | oversold asset   = result BUY "oversold"
+    | otherwise        = result HODL ""
     
-    where result s = AnalysisResult s description
+    where result suggestion reason = AnalysisResult { analysis = analysisName
+                                                    , reason = reason
+                                                    , suggestion = suggestion }
 
 
 rsi :: Analysis
@@ -43,9 +48,13 @@ macd = base "MACD" overbought oversold
 
 
 candlesticks :: Analysis
-candlesticks asset = maybe defaultResult result firstMatch
+candlesticks asset = maybe defaultResult toResult firstMatch
     where candles = init . Asset.candlesticks $ asset -- Take all candles except the last one (unconfirmed)
           orderedPatterns = sortOn patternSize patterns 
           firstMatch = find (`match` candles) orderedPatterns
-          defaultResult = AnalysisResult HODL "candlesticks"
-          result pattern = AnalysisResult (suggestion pattern) (description pattern)
+          defaultResult = result HODL "no match"
+          toResult pattern = result (Candlesticks.suggestion pattern) (name pattern ++ " pattern")
+          result suggestion reason = AnalysisResult { analysis = "candlesticks" 
+                                                    , reason = reason
+                                                    , suggestion = suggestion }
+        
