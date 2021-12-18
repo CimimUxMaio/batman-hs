@@ -2,7 +2,7 @@ module Model.Analysis.Candlesticks where
 
 import Model.Asset (Candle, close, open, high, low)
 import Model.Analysis.Suggestion ( Suggestion(SELL, BUY) )
-import Model.Utils ( average, current )
+import Model.Utils ( average, previous )
 import Data.List.Extra (takeEnd)
 
 
@@ -24,7 +24,7 @@ bullishHammer = CandlesticksPattern { name = "bullish hammer"
                                     , patternSize = 1
                                     , match = match
                                     , suggestion = BUY }
-    where match candles = downwardTrend candles && isStraightHammer (current candles)
+    where match candles = downwardTrend candles && isStraightHammer (previous candles)
 
 
 bullishInvertedHammer :: CandlesticksPattern
@@ -32,7 +32,7 @@ bullishInvertedHammer = CandlesticksPattern { name = "bullish inverted hammer"
                                             , patternSize = 1
                                             , match = match
                                             , suggestion = BUY }
-    where match candles = downwardTrend candles && isInvertedHammer (current candles)
+    where match candles = downwardTrend candles && isInvertedHammer (previous candles)
 
 
 hangingMan :: CandlesticksPattern
@@ -40,7 +40,7 @@ hangingMan = CandlesticksPattern { name = "hanging man"
                                  , patternSize = 1
                                  , match = match
                                  , suggestion = SELL }
-    where match candles = upwardTrend candles && isStraightHammer (current candles)
+    where match candles = upwardTrend candles && isStraightHammer (previous candles)
 
 
 shootingStar :: CandlesticksPattern
@@ -48,7 +48,7 @@ shootingStar = CandlesticksPattern { name = "shooting star"
                                    , patternSize = 1
                                    , match = match
                                    , suggestion = SELL }
-    where match candles = upwardTrend candles && isInvertedHammer (current candles)
+    where match candles = upwardTrend candles && isInvertedHammer (previous candles)
 
 
 
@@ -104,7 +104,7 @@ averageGain = average 0 . gains
 
 
 averageLoss :: [Candle] -> Double
-averageLoss = average 0 . losses
+averageLoss = abs . average 0 . losses
 
 
 height :: Candle -> Double
