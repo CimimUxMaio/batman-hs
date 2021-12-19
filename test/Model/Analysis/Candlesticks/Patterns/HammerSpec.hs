@@ -23,8 +23,7 @@ import Model.Analysis.Candlesticks
 spec :: Spec
 spec = do
     describe "hammer patterns" $ do
-
-        describe "bullishHammer" $ do
+        describe "bullish hammer" $ do
             it "matches with a red hammer pattern" $ do
                 let candles = buildCandles bearishTrend redHammer
                 candles `shouldSatisfy` match bullishHammer
@@ -50,7 +49,7 @@ spec = do
                 candles `shouldNotSatisfy` match bullishHammer
 
 
-        describe "hangingMan" $ do
+        describe "hanging man" $ do
             it "matches with a red hammer pattern" $ do
                 let candles = buildCandles bullishTrend redHammer
                 candles `shouldSatisfy` match hangingMan 
@@ -76,7 +75,7 @@ spec = do
                 candles `shouldNotSatisfy` match hangingMan 
 
 
-        describe "bullishInvertedHammer" $ do
+        describe "bullish inverted hammer" $ do
             it "matches with a red inverted hammer pattern" $ do
                 let candles = buildCandles bearishTrend redInvertedHammer
                 candles `shouldSatisfy` match bullishInvertedHammer 
@@ -102,7 +101,7 @@ spec = do
                 candles `shouldNotSatisfy` match bullishInvertedHammer
 
 
-        describe "shootingStar" $ do
+        describe "shooting star" $ do
             it "matches with a red inverted hammer pattern" $ do
                 let candles = buildCandles bullishTrend redInvertedHammer
                 candles `shouldSatisfy` match shootingStar   

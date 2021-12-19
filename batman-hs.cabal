@@ -94,6 +94,7 @@ test-suite batman-hs-test
       Model.Analysis.Candlesticks.Patterns.Spec
       Model.Analysis.Candlesticks.Spec
       Model.Analysis.CandlesticksAnalysisSpec
+      Model.Analysis.RSIAnalysisSpec
       Model.Analysis.Spec
       Model.Spec
       TestUtils
