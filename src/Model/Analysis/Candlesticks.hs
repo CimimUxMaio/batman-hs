@@ -24,7 +24,7 @@ bullishHammer = CandlesticksPattern { name = "bullish hammer"
                                     , patternSize = 1
                                     , match = match
                                     , suggestion = BUY }
-    where match candles = downwardTrend candles && isStraightHammer (previous candles)
+    where match candles = downwardTrend candles && isStraightHammer (last candles)
 
 
 bullishInvertedHammer :: CandlesticksPattern
@@ -32,7 +32,7 @@ bullishInvertedHammer = CandlesticksPattern { name = "bullish inverted hammer"
                                             , patternSize = 1
                                             , match = match
                                             , suggestion = BUY }
-    where match candles = downwardTrend candles && isInvertedHammer (previous candles)
+    where match candles = downwardTrend candles && isInvertedHammer (last candles)
 
 
 hangingMan :: CandlesticksPattern
@@ -40,7 +40,7 @@ hangingMan = CandlesticksPattern { name = "hanging man"
                                  , patternSize = 1
                                  , match = match
                                  , suggestion = SELL }
-    where match candles = upwardTrend candles && isStraightHammer (previous candles)
+    where match candles = upwardTrend candles && isStraightHammer (last candles)
 
 
 shootingStar :: CandlesticksPattern
@@ -48,7 +48,7 @@ shootingStar = CandlesticksPattern { name = "shooting star"
                                    , patternSize = 1
                                    , match = match
                                    , suggestion = SELL }
-    where match candles = upwardTrend candles && isInvertedHammer (previous candles)
+    where match candles = upwardTrend candles && isInvertedHammer (last candles)
 
 
 

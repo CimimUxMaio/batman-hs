@@ -32,11 +32,9 @@ trend next = map aux [1..trendSize]
 type PatternBuilder = Double -> [Candle]
 
 
-buildCandles :: [Candle] -> PatternBuilder -> PatternBuilder -> [Candle]
-buildCandles trend patternBuilder currentBuilder = trend ++ p ++ currentCandle
+buildCandles :: [Candle] -> PatternBuilder -> [Candle]
+buildCandles trend patternBuilder = trend ++ patternBuilder (lastClose trend)
     where lastClose = close . last
-          p = patternBuilder (lastClose trend)
-          currentCandle = currentBuilder (lastClose p)
 
 
 redHammer :: PatternBuilder   -- body 30%

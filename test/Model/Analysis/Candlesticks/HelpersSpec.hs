@@ -1,4 +1,4 @@
-module Candlesticks.HelpersSpec where
+module Model.Analysis.Candlesticks.HelpersSpec where
 
 import Test.Hspec (Spec, describe, it, shouldNotSatisfy, shouldSatisfy)
 import TestUtils ( bullishTrend, bearishTrend )

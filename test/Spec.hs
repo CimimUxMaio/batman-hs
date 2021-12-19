@@ -1,6 +1,6 @@
 import Test.Hspec (hspec)
-import qualified Candlesticks.Spec as CandlesticksSpec
+import qualified Model.Spec as ModelSpec
 
 main :: IO ()
 main = hspec $ do
-    CandlesticksSpec.spec
+    ModelSpec.spec

@@ -89,10 +89,13 @@ test-suite batman-hs-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Candlesticks.HelpersSpec
-      Candlesticks.Patterns.HammerSpec
-      Candlesticks.Patterns.Spec
-      Candlesticks.Spec
+      Model.Analysis.Candlesticks.HelpersSpec
+      Model.Analysis.Candlesticks.Patterns.HammerSpec
+      Model.Analysis.Candlesticks.Patterns.Spec
+      Model.Analysis.Candlesticks.Spec
+      Model.Analysis.CandlesticksAnalysisSpec
+      Model.Analysis.Spec
+      Model.Spec
       TestUtils
       Paths_batman_hs
   hs-source-dirs:
