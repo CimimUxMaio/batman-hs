@@ -12,7 +12,7 @@ run :: BatmanConfig -> IO ()
 run config = do
     putStrLn "running batman..."
     assets <- mapM (getAsset config) symbols
-    let analysisList = [rsi, macd, candlesticks]
+    let analysisList = [rsi (30, 70), macd, candlesticks]
     let results = map (second (analyse analysisList)) assets
 
     putStrLn $ toMessage results

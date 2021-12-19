@@ -27,10 +27,10 @@ base analysisName overbought oversold asset
                                                     , suggestion = suggestion }
 
 
-rsi :: Analysis
-rsi = base "RSI" overbought oversold
-    where overbought asset = previousRSI asset >= 70 && currentRSI asset < 70
-          oversold asset   = previousRSI asset <= 30 && currentRSI asset > 30
+rsi :: (Double, Double) -> Analysis
+rsi (lowerBound, upperBound) = base "RSI" overbought oversold
+    where overbought asset = previousRSI asset >= upperBound && currentRSI asset < upperBound
+          oversold asset   = previousRSI asset <= lowerBound && currentRSI asset > lowerBound
           currentRSI  = current . Asset.rsi
           previousRSI = previous . Asset.rsi
 
