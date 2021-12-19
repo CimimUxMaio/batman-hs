@@ -75,7 +75,7 @@ greenInvertedHammer open = [Candle { high = open + 90
 
 
 redInvertedHammer :: PatternBuilder
-redInvertedHammer open = [Candle { high = open + 40
-                                 , low = open - 60
+redInvertedHammer open = [Candle { high = open + 45
+                                 , low = open - 55
                                  , open = open
-                                 , close = open - 40 }]
+                                 , close = open - 30 }]

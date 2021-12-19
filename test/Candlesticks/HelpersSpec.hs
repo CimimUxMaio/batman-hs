@@ -1,4 +1,4 @@
-module Candlesticks.UtilsSpec where
+module Candlesticks.HelpersSpec where
 
 import Test.Hspec (Spec, describe, it, shouldNotSatisfy, shouldSatisfy)
 import TestUtils ( bullishTrend, bearishTrend )
@@ -7,7 +7,7 @@ import Model.Analysis.Candlesticks (downwardTrend, upwardTrend)
 
 spec :: Spec
 spec = do
-    describe "utils" $ do
+    describe "helpers" $ do
         describe "trends" $ do
             describe "downwardTrend" $ do
                 it "is true for a bearish list of candlesticks data" $ do

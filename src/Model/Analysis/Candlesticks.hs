@@ -56,7 +56,7 @@ shootingStar = CandlesticksPattern { name = "shooting star"
 type TrendCondition = [Candle] -> Bool
 
 trend :: (Double -> Double -> Bool) -> TrendCondition
-trend glComparator candles = length candles >= trendSize && (averageGain sample `glComparator` averageLoss sample)
+trend glComparator candles = length candles >= trendSize && (totalGain sample `glComparator` totalLoss sample)
     where trendSize = 4
           sample = takeEnd trendSize candles
 
@@ -99,12 +99,12 @@ losses :: [Candle] -> [Double]
 losses = filter (< 0) . map gain
 
 
-averageGain :: [Candle] -> Double
-averageGain = average 0 . gains
+totalGain :: [Candle] -> Double
+totalGain = sum . gains
 
 
-averageLoss :: [Candle] -> Double
-averageLoss = abs . average 0 . losses
+totalLoss :: [Candle] -> Double
+totalLoss = abs . sum .losses
 
 
 height :: Candle -> Double
