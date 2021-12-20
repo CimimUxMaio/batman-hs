@@ -1,130 +1,102 @@
-# Haskell stack project Github Actions template
-# https://gist.github.com/mstksg/11f753d891cee5980326a8ea8c865233
-#
-# To use, mainly change the list in 'plans' and modify 'include' for
-# any OS package manager deps.
-#
-# Currently not working for cabal-install >= 3
-#
-# Based on https://raw.githubusercontent.com/commercialhaskell/stack/stable/doc/travis-complex.yml
-#
-# TODO:
-# * cache (https://github.com/actions/cache)
-#     but this is too small. native cacheing will come soon
-#     https://github.community/t5/GitHub-Actions/Caching-files-between-GitHub-Action-executions/m-p/30974/highlight/true#M630
-#     so we can wait for then.
-# * support for cabal-install >= 3
+name: CI
 
-name: Haskell Stack Project CI
-
+# Trigger the workflow on push or pull request, but only for the main branch
 on:
+  pull_request:
   push:
-  schedule:
-  - cron: "0 0 * * 1"
+    branches: [main]
 
 jobs:
-  build:
+  cabal:
+    name: ${{ matrix.os }} / ghc ${{ matrix.ghc }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest]
-        # use this to specify what resolvers and ghc to use
-        plan:
-        - { build: stack, resolver: "--resolver lts-9"  }    # ghc-8.0.2
-        - { build: stack, resolver: "--resolver lts-11"  }   # ghc-8.2.2
-        - { build: stack, resolver: "--resolver lts-12"  }   # ghc-8.4.4
-        # - { build: stack, resolver: "--resolver lts-13"  }  redundant because lts-14 checks ghc-8.6 already
-        - { build: stack, resolver: "--resolver lts-14"  }   # ghc-8.6.5
-        - { build: stack, resolver: "--resolver nightly" }
-        - { build: stack, resolver: ""                   }
-        - { build: cabal, ghc: 8.0.2, cabal-install: "2.0"  }   # setup-haskell only supports cabal-install 2.0 and higher
-        - { build: cabal, ghc: 8.2.2, cabal-install: "2.0"  }
-        - { build: cabal, ghc: 8.4.4, cabal-install: "2.2"  }
-        - { build: cabal, ghc: 8.6.5, cabal-install: "2.4"  }
-        - { build: cabal, ghc: 8.8.1, cabal-install: "2.4"  }   # currently not working for >= 3.0
-        # use this to include any dependencies from OS package managers
-        include: []
-        # - os: macOS-latest
-        #   brew: anybrewdeps
-        # - os: ubuntu-latest
-        #   apt-get: happy libblas-dev liblapack-dev
-
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+        cabal: ["3.2"]
+        ghc:
+          - "8.6.5"
+          - "8.8.4"
+          - "8.10.2"
         exclude:
-        - os: macOS-latest
-          plan:
-            build: cabal
+          - os: macOS-latest
+            ghc: 8.8.4
+          - os: macOS-latest
+            ghc: 8.6.5
+          - os: windows-latest
+            ghc: 8.10.2
+          - os: windows-latest
+            ghc: 8.6.5
 
-    runs-on: ${{ matrix.os }}
     steps:
-    - name: Install OS Packages
-      uses: mstksg/get-package@v1
-      with:
-        apt-get: ${{ matrix.apt-get }}
-        brew: ${{ matrix.brew }}
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
+      if: github.event.action == 'opened' || github.event.action == 'synchronize' || github.event.ref == 'refs/heads/main'
 
-    - name: Setup stack
-      uses: mstksg/setup-stack@v1
-
-    - name: Setup cabal-install
-      uses: actions/setup-haskell@v1
+    - uses: actions/setup-haskell@v1.1.4
+      id: setup-haskell-cabal
+      name: Setup Haskell
       with:
-        ghc-version: ${{ matrix.plan.ghc }}
-        cabal-version: ${{ matrix.plan.cabal-install }}
-      if: matrix.plan.build == 'cabal'
+        ghc-version: ${{ matrix.ghc }}
+        cabal-version: ${{ matrix.cabal }}
+
+    - name: Configure
+      run: |
+        cabal configure --enable-tests --enable-benchmarks --test-show-details=direct
+
+    - name: Freeze
+      run: |
+        cabal freeze
+
+    - uses: actions/cache@v2.1.3
+      name: Cache ~/.cabal/store
+      with:
+        path: ${{ steps.setup-haskell-cabal.outputs.cabal-store }}
+        key: ${{ runner.os }}-${{ matrix.ghc }}-${{ hashFiles('cabal.project.freeze') }}
 
     - name: Install dependencies
       run: |
-        set -ex
-        case "$BUILD" in
-          stack)
-            stack --no-terminal --install-ghc $ARGS test --bench --only-dependencies
-            ;;
-          cabal)
-            cabal --version
-            cabal update
-            PACKAGES=$(stack --install-ghc query locals | grep '^ *path' | sed 's@^ *path:@@')
-            cabal install --only-dependencies --enable-tests --enable-benchmarks --force-reinstalls --ghc-options=-O0 --reorder-goals --max-backjumps=-1 $CABALARGS $PACKAGES
-            ;;
-        esac
-        set +ex
-      env:
-        ARGS: ${{ matrix.plan.resolver }}
-        BUILD: ${{ matrix.plan.build }}
+        cabal build all --only-dependencies
 
     - name: Build
       run: |
-        set -ex
-        case "$BUILD" in
-          stack)
-            stack --no-terminal $ARGS test --bench --no-run-benchmarks --haddock --no-haddock-deps
-            ;;
-          cabal)
-            PACKAGES=$(stack --install-ghc query locals | grep '^ *path' | sed 's@^ *path:@@')
-            cabal install --enable-tests --enable-benchmarks --force-reinstalls --ghc-options=-O0 --reorder-goals --max-backjumps=-1 $CABALARGS $PACKAGES
+        cabal build all
 
-            ORIGDIR=$(pwd)
-            for dir in $PACKAGES
-            do
-              cd $dir
-              cabal check || [ "$CABALVER" == "1.16" ]
-              cabal sdist
-              PKGVER=$(cabal info . | awk '{print $2;exit}')
-              SRC_TGZ=$PKGVER.tar.gz
-              cd dist
-              tar zxfv "$SRC_TGZ"
-              cd "$PKGVER"
-              cabal configure --enable-tests --ghc-options -O0
-              cabal build
-              if [ "$CABALVER" = "1.16" ] || [ "$CABALVER" = "1.18" ]; then
-                cabal test
-              else
-                cabal test --show-details=streaming --log=/dev/stdout
-              fi
-              cd $ORIGDIR
-            done
-            ;;
-        esac
-        set +ex
-      env:
-        ARGS: ${{ matrix.plan.resolver }}
-        BUILD: ${{ matrix.plan.build }}
+    - name: Test
+      run: |
+        cabal test all
+
+  stack:
+    name: stack / ghc ${{ matrix.ghc }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        stack: ["2.3.1"]
+        ghc: ["8.8.4"]
+
+    steps:
+    - uses: actions/checkout@v2
+      if: github.event.action == 'opened' || github.event.action == 'synchronize' || github.event.ref == 'refs/heads/main'
+
+    - uses: actions/setup-haskell@v1.1.4
+      name: Setup Haskell Stack
+      with:
+        ghc-version: ${{ matrix.ghc }}
+        stack-version: ${{ matrix.stack }}
+
+    - uses: actions/cache@v2.1.3
+      name: Cache ~/.stack
+      with:
+        path: ~/.stack
+        key: ${{ runner.os }}-${{ matrix.ghc }}-stack
+
+    - name: Install dependencies
+      run: |
+        stack build --system-ghc --test --bench --no-run-tests --no-run-benchmarks --only-dependencies
+
+    - name: Build
+      run: |
+        stack build --system-ghc --test --bench --no-run-tests --no-run-benchmarks
+
+    - name: Test
+      run: |
+        stack test --system-ghc
