@@ -50,6 +50,5 @@ getAction (NewChatMembers chat users) config dbRef =
 getAction (LeftChat chat user) config dbRef = 
     print $ "removed from chat " ++ show user 
 
-
 getAction (NewGroup chat created) config dbRef = 
     print $ "new group chat " ++ show created

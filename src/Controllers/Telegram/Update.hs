@@ -22,7 +22,7 @@ instance FromJSON Chat where
 
 data Message = TextMessage { chat :: Chat, msgText :: String } 
              | NewChatMembers { chat :: Chat, users :: [User] }
-             | LeftChat { chat :: Chat, user :: [User] }
+             | LeftChat { chat :: Chat, user :: User }
              | NewGroup { chat :: Chat, created :: Bool }
              deriving (Show, Generic)
             
