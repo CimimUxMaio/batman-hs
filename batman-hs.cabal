@@ -26,7 +26,9 @@ source-repository head
 library
   exposed-modules:
       Config
-      Controllers.Telegram
+      Controllers.Telegram.Commands
+      Controllers.Telegram.Controller
+      Controllers.Telegram.Update
       Lib
       Model.Analysis.Analysis
       Model.Analysis.Candlesticks
@@ -36,7 +38,7 @@ library
       Model.Group
       Model.Utils
       Persistence.Database
-      TelegramChat
+      Telegram
   other-modules:
       Paths_batman_hs
   hs-source-dirs:

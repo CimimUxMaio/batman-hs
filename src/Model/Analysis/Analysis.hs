@@ -13,6 +13,8 @@ data AnalysisResult = AnalysisResult { analysis   :: String
                                      , reason     :: String 
                                      , suggestion :: Suggestion } deriving Show
 
+type ResultMap = [(String, [AnalysisResult])]
+
 type Analysis = Asset -> AnalysisResult
 
 

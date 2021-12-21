@@ -1,13 +1,21 @@
-module TelegramChat where
+module Telegram where
 
 import Network.HTTP.Req
-import Control.Monad.IO.Class
-import Data.Aeson
+    ( defaultHttpConfig,
+      (/:),
+      https,
+      ignoreResponse,
+      req,
+      runReq,
+      POST(POST),
+      ReqBodyJson(ReqBodyJson) )
+import Data.Aeson ( object, KeyValue((.=)) )
 import Config (getConfig, TelegramConfig)
 import qualified Config
 import Data.Text (pack)
 
-sendMessage :: TelegramConfig -> Integer -> String -> IO ()
+
+sendMessage :: TelegramConfig -> Int -> String -> IO ()
 sendMessage config chatId text = runReq defaultHttpConfig $ do
     let payload = object [ "chat_id" .= chatId, "text" .= text ]
     req POST url (ReqBodyJson payload) ignoreResponse mempty
