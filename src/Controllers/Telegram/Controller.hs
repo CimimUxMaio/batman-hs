@@ -3,10 +3,10 @@ module Controllers.Telegram.Controller
 
 import Controllers.Telegram.Update
     ( Update(message),
-      Message(NewGroup, TextMessage, NewChatMembers, LeftChat), Chat (chatId), User )
+      Message(NewGroup, TextMessage, NewChatMembers, LeftChat, chat), Chat (chatId), User )
 import Config ( TelegramConfig(token) )
-import Data.IORef ( IORef )
-import Persistence.Database ( Database )
+import Data.IORef ( IORef, readIORef, modifyIORef )
+import Persistence.Database ( Database, addGroup )
 import Web.Scotty
     ( capture, jsonData, liftAndCatchIO, post, ActionM, ScottyM )
 import Controllers.Telegram.Commands
@@ -15,6 +15,7 @@ import Controllers.Telegram.Commands
       CommandArgs, parseCommand )
 import Telegram ( sendMessage )
 import Data.Functor ((<&>))
+import Model.Group (Group(TelegramChat))
 
 
 controller :: TelegramConfig -> IORef Database -> ScottyM ()
@@ -24,8 +25,12 @@ controller config dbRef = do
     post (capture webHook) $ do
         body <- (jsonData :: ActionM Update)
         case message body of
-            Nothing  -> pure ()  -- Never happens (?)
-            Just msg -> liftAndCatchIO $ getAction msg config dbRef
+            Nothing  -> pure ()  -- (?)
+            Just msg -> liftAndCatchIO $ do
+                saveChat $ chat msg
+                getAction msg config dbRef
+    
+    where saveChat chat = modifyIORef dbRef $ addGroup (TelegramChat . chatId $ chat)
 
 
 

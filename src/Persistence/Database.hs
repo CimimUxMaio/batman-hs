@@ -4,7 +4,7 @@ import Data.Set (Set, fromList, insert)
 import Model.Group ( Group )
 
 
-newtype Database = Database { groups :: Set Group }
+newtype Database = Database { groups :: Set Group } deriving Show
 
 
 init :: Database
