@@ -7,8 +7,11 @@ import Model.Analysis.Analysis
 import Data.Bifunctor (second)
 import Data.List.Extra (groupOn, intercalate)
 import Persistence.Database (Database (groups))
-import Model.Group (notify)
+import Model.Group (notify, Group)
 import Data.IORef (IORef, readIORef)
+import Control.Exception (try, catch)
+import Data.Functor ((<&>))
+import Control.Monad.Trans.Except (runExceptT)
 
 
 run :: Config -> IORef Database -> IO ()
@@ -21,12 +24,19 @@ run config dbRef = do
     let results = map (second (analyse analysisList)) assets
 
     db <- readIORef dbRef
-    mapM_ (notify config results) (groups db)
+    mapM_ (sendResults config results) $ groups db
 
     where symbols = Config.cryptos batmanConfig
           batmanConfig = Config.batman config
 
 
-
 analyse :: [Analysis] -> Asset -> [AnalysisResult]
 analyse analysisList asset = map ($ asset) analysisList
+
+
+sendResults :: Config -> ResultMap -> Group -> IO ()
+sendResults config results group = do
+    res <- runExceptT $ notify config results group
+    case res of
+        Left e  -> print e
+        Right _ -> print "OK"

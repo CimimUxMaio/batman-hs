@@ -16,6 +16,9 @@ import Controllers.Telegram.Commands
 import Telegram ( sendMessage )
 import Data.Functor ((<&>))
 import Model.Group (Group(TelegramChat))
+import Network.HTTP.Req (HttpException)
+import Control.Monad.Trans.Except (ExceptT, runExceptT)
+import Control.Monad.IO.Class (liftIO)
 
 
 controller :: TelegramConfig -> IORef Database -> ScottyM ()
@@ -28,15 +31,19 @@ controller config dbRef = do
             Nothing  -> pure ()  -- (?)
             Just msg -> liftAndCatchIO $ do
                 saveChat $ chat msg
-                getAction msg config dbRef
+                res <- runExceptT $ getAction msg config dbRef
+                case res of 
+                    Left e  -> handleException e
+                    Right _ -> pure ()
     
     where saveChat chat = modifyIORef dbRef $ addGroup (TelegramChat . chatId $ chat)
+          handleException e = print e
 
 
 
 {- HANDLERS -}
 
-type MessageAction = TelegramConfig -> IORef Database -> IO ()
+type MessageAction = TelegramConfig -> IORef Database -> ExceptT HttpException IO ()
 
 getAction :: Message -> MessageAction
 getAction (TextMessage chat msgText) config dbRef = do
@@ -44,16 +51,16 @@ getAction (TextMessage chat msgText) config dbRef = do
     case action of
         Nothing    -> pure ()
         Just doAction -> do
-            response <- doAction
+            response <- liftIO doAction
             handleResponse (chatId chat) response
     where handleResponse _ NoResponse = pure ()
           handleResponse chatId (ResponseMessage msg) = sendMessage config chatId msg
 
-getAction (NewChatMembers chat users) config dbRef = 
+getAction (NewChatMembers chat users) config dbRef = liftIO $ do
     print $ "added to chat " ++ show users
     
-getAction (LeftChat chat user) config dbRef = 
+getAction (LeftChat chat user) config dbRef = liftIO $ do
     print $ "removed from chat " ++ show user 
 
-getAction (NewGroup chat created) config dbRef = 
+getAction (NewGroup chat created) config dbRef = liftIO $ do
     print $ "new group chat " ++ show created

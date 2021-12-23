@@ -8,19 +8,22 @@ import Network.HTTP.Req
       req,
       runReq,
       POST(POST),
-      ReqBodyJson(ReqBodyJson) )
+      ReqBodyJson(ReqBodyJson), HttpException)
 import Data.Aeson ( object, KeyValue((.=)) )
 import Config (getConfig, TelegramConfig)
 import qualified Config
 import Data.Text (pack)
+import Control.Monad.Trans.Except (ExceptT (ExceptT))
+import Control.Exception (try, Exception)
 
 
-sendMessage :: TelegramConfig -> Int -> String -> IO ()
-sendMessage config chatId text = runReq defaultHttpConfig $ do
-    let payload = object [ "chat_id" .= chatId, "text" .= text ]
-    req POST url (ReqBodyJson payload) ignoreResponse mempty
-    pure ()
 
+sendMessage :: Exception e => TelegramConfig -> Int -> String -> ExceptT e IO ()
+sendMessage config chatId text = ExceptT . try $ request
     where token = Config.token config
           apiUrl = Config.apiUrl config
           url = https apiUrl /: pack ("bot" ++ token) /: "sendMessage"
+          request = runReq defaultHttpConfig $ do
+              let payload = object [ "chat_id" .= chatId, "text" .= text ]
+              req POST url (ReqBodyJson payload) ignoreResponse mempty 
+              pure ()
