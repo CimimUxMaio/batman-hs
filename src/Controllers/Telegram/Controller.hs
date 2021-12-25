@@ -19,6 +19,11 @@ import Model.Group (Group(TelegramChat))
 import Network.HTTP.Req (HttpException)
 import Control.Monad.Trans.Except (ExceptT, runExceptT)
 import Control.Monad.IO.Class (liftIO)
+import Logging (withLogger, LoggingFunctionBuilder, prependSections)
+import qualified Logging
+import System.Log.FastLogger (TimedFastLogger)
+import Controllers.Telegram.LogHelper (logUpdate)
+
 
 
 controller :: TelegramConfig -> IORef Database -> ScottyM ()
@@ -27,17 +32,15 @@ controller config dbRef = do
     let webHook = '/' : token
     post (capture webHook) $ do
         body <- (jsonData :: ActionM Update)
-        case message body of
-            Nothing  -> pure ()  -- (?)
-            Just msg -> liftAndCatchIO $ do
-                saveChat $ chat msg
-                res <- runExceptT $ getAction msg config dbRef
-                case res of 
-                    Left e  -> handleException e
-                    Right _ -> pure ()
+        liftIO $ withLogger $ \logger -> do
+            let msg = message body
+            saveChat $ chat msg
+            res <- runExceptT $ getAction msg config dbRef
+            case res of 
+                Left e  -> logUpdate Logging.error logger [] $ show e
+                Right _ -> pure ()
     
     where saveChat chat = modifyIORef dbRef $ addGroup (TelegramChat . chatId $ chat)
-          handleException e = print e
 
 
 
@@ -56,11 +59,11 @@ getAction (TextMessage chat msgText) config dbRef = do
     where handleResponse _ NoResponse = pure ()
           handleResponse chatId (ResponseMessage msg) = sendMessage config chatId msg
 
-getAction (NewChatMembers chat users) config dbRef = liftIO $ do
-    print $ "added to chat " ++ show users
+getAction (NewChatMembers chat users) config dbRef = liftIO . withLogger $ \logger -> do
+    logUpdate Logging.debug logger ["NewChatMembers"] $ "added to chat" ++ show users
     
-getAction (LeftChat chat user) config dbRef = liftIO $ do
-    print $ "removed from chat " ++ show user 
+getAction (LeftChat chat user) config dbRef = liftIO . withLogger $ \logger -> do
+    logUpdate Logging.debug logger ["LeftChat"] $ "removed from chat" ++ show user
 
-getAction (NewGroup chat created) config dbRef = liftIO $ do
-    print $ "new group chat " ++ show created
+getAction (NewGroup chat created) config dbRef = liftIO . withLogger $ \logger -> do
+    logUpdate Logging.debug logger ["NewGroup"] $ "removed from chat" ++ show created

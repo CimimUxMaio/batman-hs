@@ -28,8 +28,10 @@ library
       Config
       Controllers.Telegram.Commands
       Controllers.Telegram.Controller
+      Controllers.Telegram.LogHelper
       Controllers.Telegram.Update
       Lib
+      Logging
       Model.Analysis.Analysis
       Model.Analysis.Candlesticks
       Model.Analysis.Suggestion
@@ -54,11 +56,16 @@ library
     , bytestring
     , containers
     , cron
+    , data-default
     , extra
+    , fast-logger
+    , http-types
     , req
     , scotty
     , text
     , transformers
+    , wai
+    , warp
   default-language: Haskell2010
 
 executable batman-hs-exe
@@ -80,11 +87,16 @@ executable batman-hs-exe
     , bytestring
     , containers
     , cron
+    , data-default
     , extra
+    , fast-logger
+    , http-types
     , req
     , scotty
     , text
     , transformers
+    , wai
+    , warp
   default-language: Haskell2010
 
 test-suite batman-hs-test
@@ -117,10 +129,15 @@ test-suite batman-hs-test
     , bytestring
     , containers
     , cron
+    , data-default
     , extra
+    , fast-logger
     , hspec
+    , http-types
     , req
     , scotty
     , text
     , transformers
+    , wai
+    , warp
   default-language: Haskell2010

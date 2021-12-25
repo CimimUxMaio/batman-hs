@@ -24,13 +24,3 @@ data Asset = Asset { candlesticks :: [Candle]
 
 
 
-getAsset :: BatmanConfig -> String -> IO (String, Asset)
-getAsset config symbol = runReq defaultHttpConfig $ do
-        r <- req GET url NoReqBody jsonResponse (mconcat options)
-        pure (symbol, responseBody r :: Asset)
-
-    where apiUrl = Config.dataApiUrl config
-          url = http apiUrl /: "binance" /: pack symbol
-          options = [ port 8000
-                    , "interval" =: Config.dataInterval config
-                    , "limit" =: Config.dataAmount config ]

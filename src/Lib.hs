@@ -2,7 +2,7 @@ module Lib
     ( main
     ) where
 
-import Web.Scotty (scotty)
+import Web.Scotty (scotty, Options (Options, settings), scottyOpts, scottySocket)
 import qualified Controllers.Telegram.Controller as Telegram
 import GHC.Generics (Generic)
 import Data.Aeson ( FromJSON, decode )
@@ -17,33 +17,46 @@ import qualified Persistence.Database as Database
 import Data.IORef (newIORef, IORef)
 import Persistence.Database (Database, addGroup)
 import Model.Group ( Group(TelegramChat, chatId) )
+import Logging (withLogger, scottyLogging)
+import qualified Logging
+import Data.List.Extra (lower)
+import Data.Default (def)
+import Network.Wai.Handler.Warp.Internal ( Settings(settingsPort), settingsLogger )
+import Network.Wai.Handler.Warp (defaultSettings)
+import System.Log.FastLogger (TimedFastLogger)
+import Network.Wai (Request (httpVersion, requestMethod, rawPathInfo, rawQueryString))
+import Network.HTTP.Types (Status (statusMessage, statusCode))
 
 
 main :: IO ()
 main = do
     config <- getConfig'
     dbRef <- newIORef $ addGroup (TelegramChat { chatId = -689220770 }) Database.init
-    startBatmanJob config dbRef
+    scheduleBatman config dbRef
     server config dbRef
 
 
-
-startBatmanJob :: Config -> IORef Database -> IO ()
-startBatmanJob config dbRef = do 
-    putStrLn description'
+scheduleBatman :: Config -> IORef Database -> IO ()
+scheduleBatman config dbRef = withLogger $ \logger -> do
     execSchedule $ addJob (Batman.run config dbRef) cronExp
-    pure ()
+    Logging.info logger [location "scheduleBatman"] description'
 
     where batmanConfig = Config.batman config
           cronExp = Config.cronExp batmanConfig
           description' = case parseCronSchedule cronExp of
             Left err -> error err
-            Right cs -> "running analysis " ++ describe defaultOpts cs
-
+            Right cs -> "batman scheduled for " ++ lower (describe defaultOpts cs)
 
 
 server :: Config -> IORef Database -> IO ()
-server config dbRef = do
+server config dbRef = withLogger $ \logger -> do
     let port = Config.port . Config.server $ config
-    scotty port $ do
+    Logging.info logger [location "server"] $ "server started on port " ++ show port
+    scottyOpts (opts port logger) $ do
         Telegram.controller (Config.telegram config) dbRef
+
+    where opts port logger = Options 0 $ defaultSettings { settingsPort = port, settingsLogger = scottyLogging logger }
+
+
+location :: String -> String
+location funcName = "main:" ++ funcName

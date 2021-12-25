@@ -1,7 +1,7 @@
 module Controllers.Telegram.Update where
 
 import GHC.Generics (Generic)
-import Data.Aeson ( FromJSON(parseJSON), (.:), (.:?), withObject )
+import Data.Aeson ( FromJSON(parseJSON), (.:), withObject )
 import Data.Foldable (asum)
 
 
@@ -36,4 +36,4 @@ instance FromJSON Message where
             NewGroup       <$> chat <*> obj .: "group_chat_created" ]
 
 
-newtype Update = Update { message :: Maybe Message } deriving (Show, Generic, FromJSON)
+newtype Update = Update { message :: Message } deriving (Show, Generic, FromJSON)

@@ -2,6 +2,9 @@ module Controllers.Telegram.Commands where
 
 import Controllers.Telegram.Update ( Message )
 import Data.List (intercalate)
+import Logging (withLogger)
+import qualified Logging
+import Controllers.Telegram.LogHelper (logCommand)
 
 
 type CommandContext = Message
@@ -21,9 +24,12 @@ command :: String -> Command
 command "hello" args =
     pure . ResponseMessage $ "Hello " ++ unwords args ++ "!"
 
-command name args =  -- Default command
-    pure . ResponseMessage $ "unknown command "
-                          ++ wrap '"' name
-                          ++ " with args: "
-                          ++ intercalate ", " args
+
+command name args = withLogger $ \logger -> do  -- Default command
+    logCommand Logging.debug logger ["unknownCommand"] cmdDesc
+    pure . ResponseMessage $ cmdDesc
     where wrap c s = c:s ++ [c]
+          cmdDesc = "unknown command "
+                  ++ wrap '"' name
+                  ++ " with args: "
+                  ++ intercalate ", " args

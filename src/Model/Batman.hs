@@ -1,22 +1,24 @@
 module Model.Batman where
 
 import Config (BatmanConfig (cryptos), Config (batman))
-import Model.Asset (getAsset, Asset)
+import Model.Asset (Asset)
 import Model.Analysis.Analysis
     ( macd, rsi, Analysis, AnalysisResult (AnalysisResult, reason, analysis, suggestion), candlesticks, ResultMap )
 import Data.Bifunctor (second)
-import Data.List.Extra (groupOn, intercalate)
 import Persistence.Database (Database (groups))
 import Model.Group (notify, Group)
 import Data.IORef (IORef, readIORef)
 import Control.Exception (try, catch)
 import Data.Functor ((<&>))
 import Control.Monad.Trans.Except (runExceptT)
+import Logging (withLogger)
+import qualified Logging
+import Telegram (getAsset)
 
 
 run :: Config -> IORef Database -> IO ()
-run config dbRef = do
-    putStrLn "running batman..."
+run config dbRef = withLogger $ \logger -> do
+    Logging.info logger ["batman:run"] "running analysis"
 
     assets <- mapM (getAsset batmanConfig) symbols
 
@@ -35,8 +37,9 @@ analyse analysisList asset = map ($ asset) analysisList
 
 
 sendResults :: Config -> ResultMap -> Group -> IO ()
-sendResults config results group = do
+sendResults config results group = withLogger $ \logger -> do
     res <- runExceptT $ notify config results group
     case res of
-        Left e  -> print e
-        Right _ -> print "OK"
+        Left e  -> Logging.error logger ["batman:sendResults"] $ show e
+        Right _ -> pure ()
+    
