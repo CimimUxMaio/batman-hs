@@ -1,7 +1,7 @@
 module Model.Batman where
 
 import Config (BatmanConfig (cryptos), Config (batman))
-import Model.Asset (Asset)
+import Model.Asset (Asset, getAsset)
 import Model.Analysis.Analysis
     ( macd, rsi, Analysis, AnalysisResult (AnalysisResult, reason, analysis, suggestion), candlesticks, ResultMap )
 import Data.Bifunctor (second)
@@ -13,7 +13,6 @@ import Data.Functor ((<&>))
 import Control.Monad.Trans.Except (runExceptT)
 import Logging (withLogger)
 import qualified Logging
-import Telegram (getAsset)
 
 
 run :: Config -> IORef Database -> IO ()

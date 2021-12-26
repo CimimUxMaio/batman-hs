@@ -1,6 +1,6 @@
 module Controllers.Telegram.Commands where
 
-import Controllers.Telegram.Update ( Message )
+import Telegram.Types ( Message )
 import Data.List (intercalate)
 import Logging (withLogger)
 import qualified Logging

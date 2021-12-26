@@ -29,7 +29,6 @@ library
       Controllers.Telegram.Commands
       Controllers.Telegram.Controller
       Controllers.Telegram.LogHelper
-      Controllers.Telegram.Update
       Lib
       Logging
       Model.Analysis.Analysis
@@ -40,7 +39,8 @@ library
       Model.Group
       Model.Utils
       Persistence.Database
-      Telegram
+      Telegram.API
+      Telegram.Types
   other-modules:
       Paths_batman_hs
   hs-source-dirs:

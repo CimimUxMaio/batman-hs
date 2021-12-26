@@ -1,4 +1,4 @@
-module Controllers.Telegram.Update where
+module Telegram.Types where
 
 import GHC.Generics (Generic)
 import Data.Aeson ( FromJSON(parseJSON), (.:), withObject )
@@ -7,6 +7,11 @@ import Data.Foldable (asum)
 
 
 newtype User = User { userId :: Int } deriving (Show, Generic)
+
+instance Eq User where
+    (==) u1 u2 = userId u1 == userId u2
+
+type Bot = User
 
 instance FromJSON User where
     parseJSON = withObject "User" $ \obj ->

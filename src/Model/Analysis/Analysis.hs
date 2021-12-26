@@ -1,6 +1,7 @@
 module Model.Analysis.Analysis where
 
 import Model.Asset as Asset
+    ( Asset(rsi, signal, macd, candlesticks) )
 import Model.Utils ( current, previous )
 import Data.Foldable.Extra (find)
 import Model.Analysis.Candlesticks (patterns, CandlesticksPattern (match, patternSize, name)) 

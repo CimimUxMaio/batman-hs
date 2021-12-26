@@ -2,7 +2,7 @@ module Model.Group where
 
 import Model.Analysis.Analysis (ResultMap, AnalysisResult (reason, analysis, suggestion))
 import Data.List.Extra ( intercalate )
-import Telegram (sendMessage)
+import Telegram.API (sendMessage)
 import Config (TelegramConfig, Config (telegram))
 import Network.HTTP.Req (HttpException)
 import Control.Monad.Trans.Except (ExceptT)
