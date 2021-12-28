@@ -41,6 +41,7 @@ dependencies:
 - warp
 - wai
 - http-types
+- sqlite-simple
 
 library:
   source-dirs: src

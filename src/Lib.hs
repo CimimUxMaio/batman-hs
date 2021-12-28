@@ -15,7 +15,6 @@ import System.Cron.Describe (defaultOpts)
 import qualified Model.Batman as Batman
 import qualified Persistence.Database as Database
 import Data.IORef (newIORef, IORef)
-import Persistence.Database (Database, addGroup)
 import Model.Group ( Group(TelegramChat, chatId) )
 import Logging (withLogger, scottyLogging)
 import qualified Logging
@@ -31,14 +30,13 @@ import Network.HTTP.Types (Status (statusMessage, statusCode))
 main :: IO ()
 main = do
     config <- getConfig'
-    dbRef <- newIORef $ addGroup (TelegramChat { chatId = -689220770 }) Database.init
-    scheduleBatman config dbRef
-    server config dbRef
+    scheduleBatman config
+    server config
 
 
-scheduleBatman :: Config -> IORef Database -> IO ()
-scheduleBatman config dbRef = withLogger $ \logger -> do
-    execSchedule $ addJob (Batman.run config dbRef) cronExp
+scheduleBatman :: Config -> IO ()
+scheduleBatman config = withLogger $ \logger -> do
+    execSchedule $ addJob (Batman.run config) cronExp
     Logging.info logger [location "scheduleBatman"] description'
 
     where batmanConfig = Config.batman config
@@ -48,12 +46,12 @@ scheduleBatman config dbRef = withLogger $ \logger -> do
             Right cs -> "batman scheduled for " ++ lower (describe defaultOpts cs)
 
 
-server :: Config -> IORef Database -> IO ()
-server config dbRef = withLogger $ \logger -> do
+server :: Config -> IO ()
+server config = withLogger $ \logger -> do
     let port = Config.port . Config.server $ config
     Logging.info logger [location "server"] $ "server started on port " ++ show port
     scottyOpts (opts port logger) $ do
-        Telegram.controller (Config.telegram config) dbRef
+        Telegram.controller (Config.telegram config)
 
     where opts port logger = Options 0 $ defaultSettings { settingsPort = port, settingsLogger = scottyLogging logger }
 

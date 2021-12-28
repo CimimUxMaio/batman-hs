@@ -62,6 +62,7 @@ library
     , http-types
     , req
     , scotty
+    , sqlite-simple
     , text
     , transformers
     , wai
@@ -93,6 +94,7 @@ executable batman-hs-exe
     , http-types
     , req
     , scotty
+    , sqlite-simple
     , text
     , transformers
     , wai
@@ -136,6 +138,7 @@ test-suite batman-hs-test
     , http-types
     , req
     , scotty
+    , sqlite-simple
     , text
     , transformers
     , wai

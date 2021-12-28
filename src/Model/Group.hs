@@ -6,15 +6,28 @@ import Telegram.API (sendMessage)
 import Config (TelegramConfig, Config (telegram))
 import Network.HTTP.Req (HttpException)
 import Control.Monad.Trans.Except (ExceptT)
+import Data.Aeson (ToJSON)
+import GHC.Generics (Generic)
+import Database.SQLite.Simple (FromRow (fromRow), field, Only (Only))
+import Data.Int (Int64)
+import Data.Text (Text)
+import Database.SQLite.Simple.ToRow (ToRow(toRow))
 
 
-newtype Group = TelegramChat { chatId :: Int } deriving (Show, Eq, Ord)
+newtype Group = TelegramChat { chatId :: Int }
+                deriving (Show, Eq, Ord)
+
+instance FromRow Group where
+    fromRow = TelegramChat <$> field
+
+instance ToRow Group where
+    toRow (TelegramChat chatId) = toRow ("telegram" :: Text, chatId)
+
 
 
 notify :: Config -> ResultMap -> Group -> ExceptT HttpException IO ()
-notify config results group = case group of 
+notify config results group = case group of
     TelegramChat chatId -> notifyTelegramChat (Config.telegram config) chatId results
-    
 
 
 
